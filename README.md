@@ -14,7 +14,7 @@ ORCID:0000-0003-3516-0795 <br/>
 - **Lillian Barros**<sup>1,2</sup>  <br/>
 ORCID:0000-0002-9050-5189 <br/>
 
-<sup>1</sup> Centro de Investigação de Montanha (CIMO), Instituto Politécnico de Bragança, Campus de Santa Apolónia, 5300-253 Bragança, Portugal <br/>>
+<sup>1</sup> Centro de Investigação de Montanha (CIMO), Instituto Politécnico de Bragança, Campus de Santa Apolónia, 5300-253 Bragança, Portugal <br/>
 <sup>2</sup> Laboratório Associado para a Sustentabilidade e Tecnologia em Regiões de Montanha (SusTEC), Instituto Politécnico de Bragança, Campus de Santa Apolónia, 5300-253 Bragança, Portugal <br/>
 
 
