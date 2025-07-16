@@ -1,7 +1,8 @@
 ### Document:
 - **Title of the dataset:** Chestnut
 - **Data underlying publication:** <br/>
-TBC
+Impact of chestnut flour processing (Boiled, Roasted, and Dried) on the chemical and sensory properties of fresh pasta
+
 ---
 
 ### Creators:
@@ -9,13 +10,16 @@ TBC
 ORCID:  <br/>
 - **Bruno Melgar**<sup>1</sup>  <br/>	
 ORCID: 0000-0002-5825-6872 <br/>
-- **Tiane C. Finimundy**<sup>1,2</sup>  <br/>
-ORCID:0000-0003-3516-0795 <br/>
+- **Luiz Pinto**<sup>2</sup>  <br/>	
+ORCID:  <br/>
 - **Lillian Barros**<sup>1,2</sup>  <br/>
 ORCID:0000-0002-9050-5189 <br/>
+- **Tiane C. Finimundy**<sup>1,2</sup>  <br/>
+ORCID:0000-0003-3516-0795 <br/>
 
-<sup>1</sup> Centro de Investigação de Montanha (CIMO), Instituto Politécnico de Bragança, Campus de Santa Apolónia, 5300-253 Bragança, Portugal <br/>
-<sup>2</sup> Laboratório Associado para a Sustentabilidade e Tecnologia em Regiões de Montanha (SusTEC), Instituto Politécnico de Bragança, Campus de Santa Apolónia, 5300-253 Bragança, Portugal <br/>
+<sup>1</sup> CIMO, LA SusTEC, Instituto Politécnico de Bragança, Campus de Santa Apolónia, 5300-253 Bragança, Portugal<br/>
+<sup>2</sup> Laboratório Colaborativo Montanhas de Investigação (MORE) – Brigantia Ecopark, 5300-358, Bragança, Portugal 
+ <br/>
 
 
 ---
@@ -41,8 +45,7 @@ Can be found in the Metadata xlsx file
 Can be found in the publication, will be linked to the dataset once published online
 
 - **This dataset contains the following files:**
-  - **Chestnut** file (Excel file with the entire dataset)
-  - **Metadata** file (Excel file with explanations of all microorganism and variables)
+  - **Chestnut.xlsx** file (Excel file with the entire dataset)
   - Code file **Chestnut.R** includes the global analyses conducted in the manuscript
 
 *This dataset is published under the CC BY (Attribution) license.
