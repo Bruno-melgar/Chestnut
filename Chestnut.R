@@ -15,7 +15,7 @@ inst <- function(pkg){
 }
 packages <- c("tidyverse","cluster", "factoextra","NbClust","tidyr", 
               "ggplot2", "ggpubr", "broom", "AICcmodavg", "ggcorrplot", 
-              "fpc","plot3D", "cluster", "readxl", "magrittr", "purrr"
+              "fpc","plot3D", "cluster", "readxl", "magrittr", "purrr",
               "multipanelfigure","klaR","psych","MASS","ggord","devtools",
               "reshape2","RColorBrewer","SensoMineR","FactoMineR","stats",
               "dplyr","ggstatsplot", "janitor", "stringr", "forcats", "rstatix",
@@ -136,6 +136,24 @@ scale_order <- c(
   "I liked extremely"
 )
 
+# Group sensorial vars withouth global and purchase
+core_sensorial_vars <- setdiff(sensorial_vars, c(global_vars, purchase_vars))
+
+# Purchase intention variables (ordinal)
+purchase_vars <- c(
+  "bought preference cooked pasta",
+  "bought preference dried pasta",
+  "bought preference roasted pasta"
+)
+
+purchase_levels <- c(
+  "certainly would not buy", 
+  "would probably not buy",
+  "i have doubts if i would buy",
+  "probably would buy",
+  "certainly would buy"
+)
+
 clean_df <- clean_df %>%
   mutate(across(all_of(core_sensorial_vars), ~ factor(.x, levels = scale_order)))
 
@@ -155,9 +173,7 @@ sensorial_levels <- c(
 )
 
 
-# Group sensorial vars withouth global and purchase
-core_sensorial_vars <- setdiff(sensorial_vars, c(global_vars, purchase_vars))
-
+"""
 # Extract and sort unique levels across all sensorial columns
 sensorial_levels <- clean_df %>%
   select(all_of(sensorial_vars)) %>%
@@ -166,21 +182,8 @@ sensorial_levels <- clean_df %>%
   pull(value) %>%
   unique() %>%
   sort()
+"""
 
-# d) Purchase intention variables (ordinal)
-purchase_vars <- c(
-  "bought preference cooked pasta",
-  "bought preference dried pasta",
-  "bought preference roasted pasta"
-)
-
-purchase_levels <- c(
-  "certainly would not buy", 
-  "would probably not buy",
-  "i have doubts if i would buy",
-  "probably would buy",
-  "certainly would buy"
-)
 
 # 2. Convert to factors ---------------------------------------------------
 
@@ -205,7 +208,7 @@ df_factors <- clean_df %>%
 # 3. Quick check ----------------------------------------------------------
 glimpse(df_factors)
 # and to check any frequency table:
-# table(df_factors$chestnut)
+table(df_factors$chestnut)
 
 
 
@@ -257,7 +260,7 @@ resultados <- map_dfr(niveles_intensidad, function(nivel) {
 
 
 # Plot
-ggbarstats(
+p <- ggbarstats(
   data = df_long_m,
   x = Intensity_Felt,
   y = Treatment_Received,
@@ -274,11 +277,30 @@ ggbarstats(
   scale_fill_manual(values = c("#7B8156", "#B15137", "#9D5316")) +
   theme(axis.title.x = element_text(size = 12))
 
+p <- p +
+  theme(
+    text = element_text(size = 11),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 10),
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    legend.title = element_text(size = 11),
+    legend.text = element_text(size = 10)
+  )
+
+ggsave(
+  filename = "Figure_Flavour_Intensity.tiff",
+  plot = p,
+  width = 180,
+  height = 150,
+  units = "mm",
+  dpi = 600,
+  compression = "lzw"
+)
 
 
 # Global panel evaluation
 # General description Sensory Evaluation -----------------------------------
-
 # Ordinal sensorial variables list
 sensorial_vars <- c(
   "cooked pasta visual", "cooked pasta flavour", "cooked pasta aroma",
@@ -337,6 +359,30 @@ df_attributes_long <- df_factors %>%
     response = factor(response, levels = sensorial_levels)
   )
 
+# Purchase intention in long format
+df_purchase_long <- df_factors %>%
+  select(all_of(purchase_vars)) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "variable",
+    values_to = "response"
+  ) %>%
+  mutate(
+    treatment = case_when(
+      str_detect(variable, "cooked")  ~ "Cooked",
+      str_detect(variable, "dried")   ~ "Dried",
+      str_detect(variable, "roasted") ~ "Roasted"
+    ),
+    treatment = factor(
+      treatment,
+      levels = c("Cooked", "Dried", "Roasted")
+    ),
+    response = factor(
+      response,
+      levels = purchase_levels,
+      ordered = TRUE
+    )
+  )
 
 # Plot
 ggplot(df_attributes_long, aes(x = response, fill = treatment)) +
@@ -360,37 +406,63 @@ ggplot(df_attributes_long, aes(x = response, fill = treatment)) +
 
 # Purchase intention summary
 df_purchase_summary <- df_purchase_long %>%
-  group_by(treatment, variable, response) %>%
-  summarise(n = n(), .groups = "drop") %>%
+  count(treatment, variable, response) %>%
   group_by(treatment, variable) %>%
   mutate(prop = n / sum(n)) %>%
   ungroup() %>%
   mutate(
-    attribute = factor(str_remove(variable, "bought preference "), 
-                       levels = c("cooked pasta", "dried pasta", "roasted pasta")),
-    response = factor(response, levels = purchase_levels, ordered = TRUE),
-    treatment = factor(treatment, levels = c("Cooked", "Dried", "Roasted"))
+    attribute = factor(
+      str_remove(variable, "bought preference "),
+      levels = c(
+        "cooked pasta",
+        "dried pasta",
+        "roasted pasta"
+      ),
+      labels = c(
+        "Cooked Pasta",
+        "Dried Pasta",
+        "Roasted Pasta"
+      )
+    )
   )
 
 # Plot
-p1 <- ggplot(df_purchase_summary, aes(x = response, y = prop, fill = treatment)) +
+p1 <- ggplot(
+  df_purchase_summary,
+  aes(
+    x = response,
+    y = prop,
+    fill = treatment
+  )
+) +
   geom_col(color = "white") +
-  scale_y_continuous(labels = scales::percent_format()) +
-  scale_fill_manual(values = c("Cooked" = "#7b8156", "Dried" = "#B15137", "Roasted" = "#9d5316")) +
   facet_wrap(~attribute, ncol = 3) +
+  scale_fill_manual(values = c(
+    "Cooked" = "#7b8156",
+    "Dried" = "#B15137",
+    "Roasted" = "#9d5316"
+  )) +
+  scale_y_continuous(labels = scales::percent_format()) +
   labs(
-    x = "Purchase Intention",
-    y = "Proportion of responses",
+    x = "Purchase intention",
+    y = "Proportion",
     title = "Purchase Preferences by Treatment"
   ) +
-  theme_linedraw(base_size = 12) +
+  theme_classic() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    legend.position = "none"
+    legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
-
-
+ggsave(
+  filename = "Purchase_pref.tiff",
+  plot = p1,
+  width = 180,
+  height = 150,
+  units = "mm",
+  dpi = 600,
+  compression = "lzw"
+)
 
 # PCA ---------------------------------------------------------------------
 
@@ -443,7 +515,26 @@ p2 <- fviz_pca_biplot(pca_res,
   theme_classic() +
   theme(legend.position = "none")  # <- remove legend
 
+p2 <- p2 +
+  theme(
+    text = element_text(size = 11),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 10),
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    legend.title = element_text(size = 11),
+    legend.text = element_text(size = 10)
+  )
 
+ggsave(
+  filename = "PCA_biplot.tiff",
+  plot = p2,
+  width = 180,
+  height = 150,
+  units = "mm",
+  dpi = 600,
+  compression = "lzw"
+)
 
 # Statistics for global responses except purchase
 # a) long data transformation with numeric responses, treatment labels and attributes
@@ -555,10 +646,31 @@ p3 <- df_long %>%
   labs(x = "Attribute", y = "Panel Rating Mean score", title = "Treatment Comparison by Attribute") +
   scale_fill_manual(values = c("Cooked" = "#7b8156", "Dried" = "#B15137", "Roasted" = "#9d5316"))
 
+ggsave(
+  filename = "Treatment_comparison.tiff",
+  plot = p3,
+  width = 180,
+  height = 150,
+  units = "mm",
+  dpi = 600,
+  compression = "lzw"
+)
+
+
 
 (dashboard <- (p2 | p3) / p1)
 
-dashboard + plot_annotation(
+d <- dashboard + plot_annotation(
   tag_levels = 'A',
   title = 'Sensory and Purchase Evaluation of Chestnut-Enriched Pasta Treatments') +
   plot_layout(guides = 'collect')
+
+ggsave(
+  filename = "Dashboard.tiff",
+  plot = d,
+  width = 270,
+  height = 200,
+  units = "mm",
+  dpi = 600,
+  compression = "lzw"
+)
